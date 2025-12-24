@@ -1,0 +1,244 @@
+[gd_scene load_steps=11 format=3 uid="uid://bqj8x7v5k3n2m"]
+
+[ext_resource type="Script" uid="uid://272iufhjfvjf" path="res://ArcadeDriftCar.gd" id="1_0"]
+[ext_resource type="Script" uid="uid://cowwwqn6sd1he" path="res://DriftSmoke.gd" id="3_0"]
+[ext_resource type="Script" uid="uid://c6a11limxhe8g" path="res://main.gd" id="4_0"]
+[ext_resource type="Script" uid="uid://b3fy05lvf5iwg" path="res://Speedometer.gd" id="6_0"]
+[ext_resource type="Script" path="res://CameraController.gd" id="7_0"]
+[ext_resource type="Script" path="res://TerrainManager.gd" id="8_0"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
+sky_top_color = Color(0.2, 0.6, 1, 1)
+sky_horizon_color = Color(0.5, 0.8, 1, 1)
+ground_bottom_color = Color(0.1, 0.4, 0.1, 1)
+ground_horizon_color = Color(0.3, 0.7, 0.3, 1)
+
+[sub_resource type="Sky" id="Sky_1"]
+sky_material = SubResource("ProceduralSkyMaterial_1")
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 2
+sky = SubResource("Sky_1")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_1"]
+direction = Vector3(0, 1, 0)
+initial_velocity_min = 0.5
+initial_velocity_max = 1.0
+gravity = Vector3(0, -2, 0)
+scale_min = 0.3
+scale_max = 0.6
+color = Color(0.5, 0.5, 0.5, 0.8)
+
+[sub_resource type="PlaceholderMesh" id="PlaceholderMesh_1"]
+
+[node name="World" type="Node3D"]
+script = ExtResource("4_0")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, -0.75, 0.433013, 0, 10, 0)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="TerrainManager" type="Node3D" parent="."]
+script = ExtResource("8_0")
+
+[node name="PlayerCar" type="RigidBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+freeze = false
+gravity_scale = 1.0
+mass = 1.0
+collision_layer = 2
+collision_mask = 1
+script = ExtResource("1_0")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PlayerCar"]
+
+[node name="SpringArm3D" type="SpringArm3D" parent="PlayerCar"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+collision_mask = 4294967295
+spring_length = 15.0
+margin = 0.2
+script = ExtResource("7_0")
+
+[node name="Camera3D" type="Camera3D" parent="PlayerCar/SpringArm3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+current = true
+
+[node name="DriftSmoke" type="GPUParticles3D" parent="PlayerCar"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1)
+emitting = false
+amount = 50
+lifetime = 0.5
+process_material = SubResource("ParticleProcessMaterial_1")
+draw_pass_1 = SubResource("PlaceholderMesh_1")
+script = ExtResource("3_0")
+
+[node name="UI" type="CanvasLayer" parent="."]
+process_mode = 4
+
+[node name="ControlsPanel" type="Panel" parent="UI"]
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 320.0
+offset_bottom = 200.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/ControlsPanel"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 290.0
+offset_bottom = 170.0
+
+[node name="Title" type="Label" parent="UI/ControlsPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Controls"
+
+[node name="Spacer1" type="Control" parent="UI/ControlsPanel/VBoxContainer"]
+custom_minimum_size = Vector2(0, 5)
+layout_mode = 2
+
+[node name="WLabel" type="Label" parent="UI/ControlsPanel/VBoxContainer"]
+layout_mode = 2
+text = "W / ↑ - Accelerate"
+
+[node name="SLabel" type="Label" parent="UI/ControlsPanel/VBoxContainer"]
+layout_mode = 2
+text = "S / ↓ - Reverse"
+
+[node name="ALabel" type="Label" parent="UI/ControlsPanel/VBoxContainer"]
+layout_mode = 2
+text = "A / ← - Turn Left"
+
+[node name="DLabel" type="Label" parent="UI/ControlsPanel/VBoxContainer"]
+layout_mode = 2
+text = "D / → - Turn Right"
+
+[node name="Spacer2" type="Control" parent="UI/ControlsPanel/VBoxContainer"]
+custom_minimum_size = Vector2(0, 5)
+layout_mode = 2
+
+[node name="SpaceLabel" type="Label" parent="UI/ControlsPanel/VBoxContainer"]
+layout_mode = 2
+text = "SPACE - Boost"
+
+[node name="ShiftLabel" type="Label" parent="UI/ControlsPanel/VBoxContainer"]
+layout_mode = 2
+text = "SHIFT - Handbrake"
+
+[node name="MouseLabel" type="Label" parent="UI/ControlsPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.2, 1)
+text = "Click + Drag - Look Around"
+
+[node name="ESCLabel" type="Label" parent="UI/ControlsPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.2, 1)
+text = "ESC - Toggle Menu"
+
+[node name="Speedometer" type="Panel" parent="UI"]
+offset_left = 20.0
+offset_top = 220.0
+offset_right = 250.0
+offset_bottom = 300.0
+script = ExtResource("6_0")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/Speedometer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SpeedLabel" type="Label" parent="UI/Speedometer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 32
+text = "0"
+horizontal_alignment = 1
+
+[node name="UnitLabel" type="Label" parent="UI/Speedometer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 16
+text = "units/s"
+horizontal_alignment = 1
+
+[node name="PauseMenu" type="Panel" parent="UI"]
+visible = false
+offset_right = 1920.0
+offset_bottom = 1080.0
+
+[node name="CenterContainer" type="CenterContainer" parent="UI/PauseMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MenuPanel" type="Panel" parent="UI/PauseMenu/CenterContainer"]
+custom_minimum_size = Vector2(400, 500)
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/PauseMenu/CenterContainer/MenuPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Title" type="Label" parent="UI/PauseMenu/CenterContainer/MenuPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "PAUSED"
+horizontal_alignment = 1
+
+[node name="Spacer1" type="Control" parent="UI/PauseMenu/CenterContainer/MenuPanel/VBoxContainer"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="ControlsTitle" type="Label" parent="UI/PauseMenu/CenterContainer/MenuPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Controls"
+horizontal_alignment = 1
+
+[node name="Spacer2" type="Control" parent="UI/PauseMenu/CenterContainer/MenuPanel/VBoxContainer"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="ControlsList" type="Label" parent="UI/PauseMenu/CenterContainer/MenuPanel/VBoxContainer"]
+layout_mode = 2
+text = "W/↑ - Accelerate
+S/↓ - Reverse
+A/← - Turn Left
+D/→ - Turn Right
+SPACE - Boost
+SHIFT - Handbrake"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Spacer3" type="Control" parent="UI/PauseMenu/CenterContainer/MenuPanel/VBoxContainer"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+
+[node name="ResumeLabel" type="Label" parent="UI/PauseMenu/CenterContainer/MenuPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.8, 0.2, 1)
+theme_override_font_sizes/font_size = 20
+text = "Press ESC to Resume"
+horizontal_alignment = 1
